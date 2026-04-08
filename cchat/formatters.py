@@ -200,11 +200,18 @@ def format_model(model: str | None) -> str:
 
 
 def format_workspace(cwd: str | None) -> str:
-    """Return the basename of the conversation's working directory."""
-    if cwd:
-        from pathlib import PurePosixPath
-        return PurePosixPath(cwd).name
-    return ""
+    """Return the basename of the conversation's working directory.
+
+    Handles both Windows-style (backslash) and POSIX-style (forward slash)
+    paths regardless of the host OS, since JSONL files may have been
+    recorded on either platform.
+    """
+    if not cwd:
+        return ""
+    normalized = cwd.replace("\\", "/").rstrip("/")
+    if not normalized:
+        return ""
+    return normalized.rsplit("/", 1)[-1]
 
 
 def format_json(data: object) -> str:

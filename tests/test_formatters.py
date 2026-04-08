@@ -21,6 +21,7 @@ from cchat.formatters import (
     format_size,
     format_table,
     format_timestamp,
+    format_workspace,
     set_no_color,
     supports_color,
     truncate,
@@ -600,3 +601,34 @@ class TestFormatJson:
         # Sets are not JSON serializable; default=str should handle it
         result = format_json(data)
         assert "items" in result
+
+
+# ===========================================================================
+# format_workspace
+# ===========================================================================
+
+
+class TestFormatWorkspace:
+    def test_windows_path(self):
+        assert format_workspace("C:\\Users\\evergr3n\\foo\\bar") == "bar"
+
+    def test_posix_path(self):
+        assert format_workspace("/Users/ted/code/cchat") == "cchat"
+
+    def test_posix_path_trailing_slash(self):
+        assert format_workspace("/Users/ted/code/cchat/") == "cchat"
+
+    def test_windows_path_trailing_backslash(self):
+        assert format_workspace("C:\\Users\\evergr3n\\foo\\bar\\") == "bar"
+
+    def test_empty_string(self):
+        assert format_workspace("") == ""
+
+    def test_none(self):
+        assert format_workspace(None) == ""
+
+    def test_relative_path(self):
+        assert format_workspace("relative/path") == "path"
+
+    def test_singlename(self):
+        assert format_workspace("singlename") == "singlename"
