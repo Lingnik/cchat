@@ -147,7 +147,12 @@ def format_timestamp(ts: str | None) -> str:
     if not ts:
         return "\u2014"
     try:
-        dt = datetime.fromisoformat(str(ts))
+        # Python 3.10's fromisoformat doesn't accept a trailing "Z";
+        # normalize it to "+00:00" for cross-version compatibility.
+        s = str(ts)
+        if s.endswith("Z"):
+            s = s[:-1] + "+00:00"
+        dt = datetime.fromisoformat(s)
         return dt.strftime("%m-%d %H:%M")
     except (ValueError, TypeError):
         return "\u2014"

@@ -526,6 +526,10 @@ class TestFormatTimestamp:
     def test_valid_iso_with_utc_offset(self):
         assert format_timestamp("2024-01-15T10:30:00+00:00") == "01-15 10:30"
 
+    def test_valid_iso_with_z_suffix(self):
+        # Python 3.10's fromisoformat rejects trailing "Z"; we normalize it.
+        assert format_timestamp("2024-01-15T10:30:00Z") == "01-15 10:30"
+
     def test_midnight(self):
         assert format_timestamp("2024-12-25T00:00:00") == "12-25 00:00"
 
