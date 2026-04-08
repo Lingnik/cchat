@@ -147,7 +147,12 @@ def format_timestamp(ts: str | None) -> str:
     if not ts:
         return "\u2014"
     try:
-        dt = datetime.fromisoformat(str(ts))
+        # Python 3.10's fromisoformat doesn't accept a trailing "Z";
+        # normalize it to "+00:00" for cross-version compatibility.
+        s = str(ts)
+        if s.endswith("Z"):
+            s = s[:-1] + "+00:00"
+        dt = datetime.fromisoformat(s)
         return dt.strftime("%m-%d %H:%M")
     except (ValueError, TypeError):
         return "\u2014"
@@ -200,11 +205,18 @@ def format_model(model: str | None) -> str:
 
 
 def format_workspace(cwd: str | None) -> str:
-    """Return the basename of the conversation's working directory."""
-    if cwd:
-        from pathlib import PurePosixPath
-        return PurePosixPath(cwd).name
-    return ""
+    """Return the basename of the conversation's working directory.
+
+    Handles both Windows-style (backslash) and POSIX-style (forward slash)
+    paths regardless of the host OS, since JSONL files may have been
+    recorded on either platform.
+    """
+    if not cwd:
+        return ""
+    normalized = cwd.replace("\\", "/").rstrip("/")
+    if not normalized:
+        return ""
+    return normalized.rsplit("/", 1)[-1]
 
 
 def format_json(data: object) -> str:
